@@ -260,19 +260,6 @@
 
 (use-package wgrep)
 
-(use-package ivy-posframe
-  :custom
-  (ivy-posframe-width      115)
-  (ivy-posframe-min-width  115)
-  (ivy-posframe-height     10)
-  (ivy-posframe-min-height 10)
-  :config
-  (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
-  (setq ivy-posframe-parameters '((parent-frame . nil)
-                                  (left-fringe . 8)
-                                  (right-fringe . 8)))
-  (ivy-posframe-mode 1))
-
 (dw/leader-key-def
   "r"   '(ivy-resume :which-key "ivy resume")
   "f"   '(:ignore t :which-key "files")
@@ -281,7 +268,6 @@
   "fR"  '(revert-buffer :which-key "revert file")
   "fl"  '(load-file :which-key "load file")
   "fs"  '(save-buffer :which-key "save file"))
-
 
 ;; Jumping with Avy
 (use-package avy
