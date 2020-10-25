@@ -8,12 +8,9 @@
 (menu-bar-mode -1)          ; Disable the menu bar
 (scroll-bar-mode -1)        ; Disable visible scrollbar
 
-
 ;; Startup performance
-
   ;; Reducing the frequency of garbage collection
 (setq gc-cons-threshold (* 50 1000 1000))
-
 
   ;; Profile emacs startup
 (add-hook 'emacs-startup-hook
@@ -61,6 +58,9 @@
 (package-initialize)
 (unless package-archive-contents
  (package-refresh-contents))
+ 
+;; Emacs theme
+(load-theme 'Sholum t) 
 
 ;; Use-package configuration
 (unless (package-installed-p 'use-package)
@@ -81,18 +81,15 @@
          (block-fonts (cadr (nth block-idx unicode-fonts-block-font-mapping)))
          (updated-block (cl-substitute new-font old-font block-fonts :test 'string-equal)))
     (setf (cdr (nth block-idx unicode-fonts-block-font-mapping))
-          `(,updated-block))))
-
-;; Desktop Environment
+          `(,updated-block)))) 
+          
+;; EXWM configuration (TODO)
 (setq dw/exwm-enabled (and (eq window-system 'x)
                            (seq-contains command-line-args "--use-exwm")))
   
 ;; Cursor configuration
 (setq-default cursor-type 'bar)
 (blink-cursor-mode 0)
-
-;; Emacs theme
-(load-theme 'Sholum t)
 
 ;; Stop creating those #auto-save# files
 (setq auto-save-default nil)
@@ -127,14 +124,14 @@
   (general-create-definer dw/ctrl-c-keys
     :prefix "C-c"))
 
-;; Which-key configuration
+  ;; Which-key configuration
 (use-package which-key
   :init (which-key-mode)
   :diminish which-key-mode
   :config
   (setq which-key-idle-delay 0.3))
   
-;; ESC cancels all
+  ;; ESC cancels all
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
 ;; Evil Mode
@@ -178,7 +175,7 @@
   (evil-collection-outline-bind-tab-p nil)
   :config
   (evil-collection-init))
-   
+  
 ;; Hydra
 (use-package hydra
   :defer 1)
@@ -219,6 +216,15 @@
   :defer t
   :after hydra)
 
+(use-package counsel
+  :bind (("M-x" . counsel-M-x)
+         ("C-x b" . counsel-ibuffer)
+         ("C-x C-f" . counsel-find-file)
+         :map minibuffer-local-map
+         ("C-r" . 'counsel-minibuffer-history))
+  :config
+  (setq ivy-initial-inputs-alist nil)) ;; Don't start searches with ^
+
 (use-package ivy-rich
   :init
   (ivy-rich-mode 1)
@@ -240,15 +246,6 @@
                            (with-current-buffer buffer
                              (not (derived-mode-p 'exwm-mode)))))))))
 
-(use-package counsel
-  :bind (("M-x" . counsel-M-x)
-         ("C-x b" . counsel-ibuffer)
-         ("C-x C-f" . counsel-find-file)
-         :map minibuffer-local-map
-         ("C-r" . 'counsel-minibuffer-history))
-  :config
-  (setq ivy-initial-inputs-alist nil)) ;; Don't start searches with ^
-
 (use-package flx  ;; Improves sorting for fuzzy-matched results
   :defer t
   :init
@@ -268,7 +265,7 @@
   "fR"  '(revert-buffer :which-key "revert file")
   "fl"  '(load-file :which-key "load file")
   "fs"  '(save-buffer :which-key "save file"))
-
+  
 ;; Jumping with Avy
 (use-package avy
   :commands (avy-goto-char avy-goto-word-0 avy-goto-line))
@@ -437,7 +434,7 @@
   :config (key-chord-mode 1))    
     
 ;; Kdeconnect configuration
-(use-package kdeconnect)
+(use-package kdeconnect
   :config
   (setq kdeconnect-active-device "9180bcdf671688e2")
   (dw/leader-key-def
@@ -452,7 +449,7 @@
   "kdl" '(kdeconnect-list-devices :which-key "list")
   "kdg" '(kdeconnect-get-active-device :which-key "get active device")
   "kds" '(kdeconnect-select-active-device :which-key "select active device")
-  "kr" '(kdeconnect-ring :which-key "ring"))
+  "kr" '(kdeconnect-ring :which-key "ring")))
   
 ;; Notifications configuration
 (use-package alert
@@ -546,7 +543,7 @@
   "bn"  '(bury-buffer :which-key "bury buffer")
   "bd"  '(:ignore t :which-key "kill buffer")
   "bdd" '(kill-buffer-and-window :which-key "current buffer")
-  "bdo" '(kill-buffer :which-key "othe buffer"))
+  "bdo" '(kill-buffer :which-key "other buffer"))
    
 ;; Expand region configuration
 (use-package expand-region
@@ -637,82 +634,4 @@
               "okular"
               '(file))))
    (openwith-mode 1))
-
-;; Emacs configuration
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ansi-color-faces-vector
-   [default bold shadow italic underline success warning error])
- '(ansi-color-names-vector
-   ["#000000" "#ff8059" "#44bc44" "#eecc00" "#2fafff" "#feacd0" "#00d3d0" "#ffffff"])
- '(awesome-tray-mode-line-active-color "#2fafff")
- '(awesome-tray-mode-line-inactive-color "#323232")
- '(custom-safe-themes
-   '("6a0d7f41968908e25b2f56fa7b4d188e3fc9a158c39ef680b349dccffc42d1c8" "c1c459af570241993823db87096bc775506c378aa02c9c6cd9ccaa8247056b96" "7e5d400035eea68343be6830f3de7b8ce5e75f7ac7b8337b5df492d023ee8483" "17a58e509bbb8318abf3558c4b7b44273b4f1b555c5e91d00d4785b7b59d6d28" "9089d25e2a77e6044b4a97a2b9fe0c82351a19fdd3e68a885f40f86bbe3b3900" "c499bf4e774b34e784ef5a104347b81c56220416d56d5fd3fd85df8704260aad" "4ced6dc5f82dfbd00a78159179928c5b3ef08384b0e357b2e1e49d915e74b040" "4417913061aa6623f89864e32fc1ab2b03a41bfb37320fe98821d6a0af7883be" "a67bc0a845bbb124e30ed389f8d593daa4448086be2709ca63f6fdefd859991a" "df6208e35f983c139d6f282ee69f8f8d9eadce6a46eb4acdce00bfb0001f03ae" default))
- '(flymake-error-bitmap '(flymake-double-exclamation-mark modus-theme-fringe-red))
- '(flymake-note-bitmap '(exclamation-mark modus-theme-fringe-cyan))
- '(flymake-warning-bitmap '(exclamation-mark modus-theme-fringe-yellow))
- '(highlight-tail-colors '(("#2f4a00" . 0) ("#00415e" . 20)))
- '(hl-sexp-background-color "#efebe9")
- '(hl-todo-keyword-faces
-   '(("HOLD" . "#cfdf30")
-     ("TODO" . "#feacd0")
-     ("NEXT" . "#b6a0ff")
-     ("THEM" . "#f78fe7")
-     ("PROG" . "#00d3d0")
-     ("OKAY" . "#4ae8fc")
-     ("DONT" . "#80d200")
-     ("FAIL" . "#ff8059")
-     ("BUG" . "#ff8059")
-     ("DONE" . "#44bc44")
-     ("NOTE" . "#f0ce43")
-     ("KLUDGE" . "#eecc00")
-     ("HACK" . "#eecc00")
-     ("TEMP" . "#ffcccc")
-     ("FIXME" . "#ff9977")
-     ("XXX+" . "#f4923b")
-     ("REVIEW" . "#6ae4b9")
-     ("DEPRECATED" . "#bfd9ff")))
- '(ibuffer-deletion-face 'modus-theme-mark-del)
- '(ibuffer-filter-group-name-face 'modus-theme-mark-symbol)
- '(ibuffer-marked-face 'modus-theme-mark-sel)
- '(ibuffer-title-face 'modus-theme-header)
- '(package-selected-packages
-   '(kaolin-themes delight diminish klere-theme laguna-theme modus-vivendi-theme which-key))
- '(pos-tip-background-color "#2E2A29")
- '(pos-tip-foreground-color "#d4d4d6")
- '(vc-annotate-background nil)
- '(vc-annotate-background-mode nil)
- '(vc-annotate-color-map
-   '((20 . "#ff8059")
-     (40 . "#feacd0")
-     (60 . "#f78fe7")
-     (80 . "#f4923b")
-     (100 . "#eecc00")
-     (120 . "#cfdf30")
-     (140 . "#f8dec0")
-     (160 . "#bfebe0")
-     (180 . "#44bc44")
-     (200 . "#80d200")
-     (220 . "#6ae4b9")
-     (240 . "#4ae8fc")
-     (260 . "#00d3d0")
-     (280 . "#c6eaff")
-     (300 . "#29aeff")
-     (320 . "#72a4ff")
-     (340 . "#00bdfa")
-     (360 . "#b6a0ff")))
- '(vc-annotate-very-old-color nil)
- '(xterm-color-names
-   ["#000000" "#ff8059" "#44bc44" "#eecc00" "#29aeff" "#feacd0" "#00d3d0" "#a8a8a8"])
- '(xterm-color-names-bright
-   ["#181a20" "#f4923b" "#80d200" "#cfdf30" "#72a4ff" "#f78fe7" "#4ae8fc" "#ffffff"]))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+   
