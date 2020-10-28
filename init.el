@@ -735,6 +735,6 @@
   :hook (eshell-mode . esh-autosuggest-mode)
   :config
   (setq esh-autosuggest-delay 0.5)
-  (set-face-foreground 'company-preview-common "DeepSkyBlue")
+  (set-face-foreground 'company-preview-common "#00bfff")
   (set-face-background 'company-preview nil))
 
