@@ -10,7 +10,7 @@
 
 ;; Startup performance
   ;; Reducing the frequency of garbage collection
-(setq gc-cons-threshold (* 50 1000 1000))
+(setq gc-cons-threshold (* 2 1000 1000))
 
   ;; Profile emacs startup
 (add-hook 'emacs-startup-hook
@@ -71,6 +71,9 @@
 
 ;; Set up the visible bell
 (setq visible-bell t)
+
+;; Fill-column
+(setq-default fill-column 80)
 
 ;; Font
   ;; Enable proper Unicode glyph support
@@ -138,12 +141,6 @@
 (defun dw/evil-hook ()
   (dolist (mode '(custom-mode
                   eshell-mode
-                  git-rebase-mode
-                  erc-mode
-                  circe-server-mode
-                  circe-chat-mode
-                  circe-query-mode
-                  sauron-mode
                   term-mode))
   (add-to-list 'evil-emacs-state-modes mode)))
 
@@ -312,8 +309,7 @@
 ;; Flycheck configuration
 (use-package flycheck
   :defer t
-  :hook (lsp-mode . flycheck-mode)
-        (org-mode . flycheck-mode))
+  :hook (org-mode . flycheck-mode))
 
 ;; TRAMP
   ;; Set default connection mode to SSH 
@@ -635,3 +631,110 @@
               '(file))))
    (openwith-mode 1))
    
+;; Org mode configuration     
+(use-package org
+  :defer t
+  :config
+  (org-babel-do-load-languages
+    'org-babel-load-languages
+    '((emacs-lisp . t)
+      (ledger . t)))
+  
+  ;; Org bullets                                                    
+  (use-package org-bullets
+  :after org
+  :hook (org-mode . org-bullets-mode)
+  :custom
+  (org-bullets-bullet-list '("◉" "○")))
+  
+  ;; Key bindings
+  (evil-define-key '(normal insert visual) org-mode-map (kbd "C-j") 'org-next-visible-heading)
+  (evil-define-key '(normal insert visual) org-mode-map (kbd "C-k") 'org-previous-visible-heading)
+  (evil-define-key '(normal insert visual) org-mode-map (kbd "M-j") 'org-metadown)
+  (evil-define-key '(normal insert visual) org-mode-map (kbd "M-k") 'org-metaup))
+  
+  (use-package evil-org
+  :after org
+  :hook ((org-mode . evil-org-mode)
+         (org-agenda-mode . evil-org-mode)
+         (evil-org-mode . (lambda () (evil-org-set-key-theme '(navigation todo insert textobjects additional)))))
+  :config
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys))
+  
+(dw/leader-key-def
+  "o"   '(:ignore t :which-key "org")
+  "om"  '(org-mode :which-key "mode")
+  "oi"  '(:ignore t :which-key "insert")
+  "oil" '(org-insert-link :which-key "insert link")
+  "on"  '(org-toggle-narrow-to-subtree :which-key "toggle narrow")
+  "oa"  '(org-agenda :which-key "agenda")
+  "oc"  '(org-capture t :which-key "capture")
+  "oe"  '(org-export-dispatch t :which-key "export"))
+
+  ;; Literate Calculations in Org Mode
+(use-package literate-calc-mode
+  :hook (org-mode . literate-calc-minor-mode))
+  
+;; Darkroom configuration
+(use-package darkroom
+  :commands darkroom-mode
+  :config
+  (setq darkroom-text-scale-increase 0))
+
+(defun dw/enter-focus-mode ()
+  (interactive)
+  (darkroom-mode 1)
+  (display-line-numbers-mode 0))
+
+(defun dw/leave-focus-mode ()
+  (interactive)
+  (darkroom-mode 0)
+  (display-line-numbers-mode 1))
+
+(defun dw/toggle-focus-mode ()
+  (interactive)
+  (if (symbol-value darkroom-mode)
+    (dw/leave-focus-mode)
+    (dw/enter-focus-mode)))
+
+(dw/leader-key-def
+  "tf" '(dw/toggle-focus-mode :which-key "focus mode"))
+  
+;; Daemons administration  
+(use-package daemons
+  :commands daemons)
+
+;; Proced
+(use-package proced
+  :commands proced
+  :config
+  (setq proced-auto-update-interval 1)
+  (add-hook 'proced-mode-hook
+            (lambda ()
+              (proced-toggle-auto-update 1)))) 
+                     
+;; Eshell configuration
+(defun dw/eshell-configure ()
+  (require 'evil-collection-eshell)
+  (evil-collection-eshell-setup))  
+
+  ;; Fish Completions
+(when (and (executable-find "usr/bin/fish")
+(use-package fish-completion
+  :hook (eshell-mode . fish-completion-mode))))
+  
+  ;; Command Highlighting
+  (use-package eshell-syntax-highlighting
+  :after esh-mode
+  :config
+  (eshell-syntax-highlighting-global-mode +1))
+  
+  ;; History Autocompletion
+  (use-package esh-autosuggest
+  :hook (eshell-mode . esh-autosuggest-mode)
+  :config
+  (setq esh-autosuggest-delay 0.5)
+  (set-face-foreground 'company-preview-common "DeepSkyBlue")
+  (set-face-background 'company-preview nil))
+
