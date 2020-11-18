@@ -421,7 +421,10 @@
   (doom-modeline-minor-modes t)
   (doom-modeline-persp-name nil)
   (doom-modeline-buffer-file-name-style 'truncate-except-project)
-  (doom-modeline-major-mode-icon nil))
+  (doom-modeline-icon t)
+  (doom-modeline-buffer-state-icon t)
+  (doom-modeline-buffer-modification-icon t)
+  (doom-modeline-major-mode-icon t))
   (doom-modeline-mode 1)
   
 ;; Keychord
@@ -565,6 +568,7 @@
     (dired-omit-mode 1)))
 
   ;; Dired design configuration
+(use-package all-the-icons-dired)
 (add-hook 'dired-mode-hook
   (lambda ()
   (interactive)
@@ -675,6 +679,10 @@
   ;; Literate Calculations in Org Mode
 (use-package literate-calc-mode
   :hook (org-mode . literate-calc-minor-mode))
+  
+  ;; Auto-complete
+(use-package auto-complete
+  :hook (org-mode . auto-complete-mode))
   
 ;; Darkroom configuration
 (use-package darkroom
